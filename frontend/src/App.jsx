@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Courses from "./pages/Courses";
@@ -9,7 +10,6 @@ import RoleDashboard from "./pages/RoleDashboard";
 import CreateCourse from "./pages/CreateCourse";
 import EditCourse from "./pages/EditCourse";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { AuthProvider } from "./context/AuthContext";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import AdminUsers from "./pages/AdminUsers";
