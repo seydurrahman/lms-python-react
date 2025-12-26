@@ -3,11 +3,16 @@ import api from "../api/axios";
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
+
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
     email: "",
   });
+
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -24,6 +29,10 @@ export default function Profile() {
           last_name: res.data.last_name || "",
           email: res.data.email || "",
         });
+
+        if (res.data.profile_image) {
+          setPreview(`http://127.0.0.1:8000${res.data.profile_image}`);
+        }
       })
       .catch(() => {
         setError("Failed to load profile");
@@ -34,7 +43,7 @@ export default function Profile() {
   }, []);
 
   // ===============================
-  // HANDLE FORM CHANGE
+  // HANDLE TEXT INPUT CHANGE
   // ===============================
   const handleChange = (e) => {
     setForm({
@@ -44,14 +53,45 @@ export default function Profile() {
   };
 
   // ===============================
-  // UPDATE PROFILE
+  // HANDLE IMAGE CHANGE
+  // ===============================
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  // ===============================
+  // UPDATE PROFILE (TEXT + IMAGE)
   // ===============================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    const formData = new FormData();
+
+    formData.append("email", form.email);
+    formData.append("first_name", form.first_name);
+    formData.append("last_name", form.last_name);
+
+    if (image) {
+      formData.append("profile_image", image);
+    }
+
     try {
-      await api.put("accounts/profile/update/", form);
+      const res = await api.put(
+        "accounts/profile/update/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setProfile(res.data);
       alert("Profile updated successfully");
     } catch {
       setError("Failed to update profile");
@@ -74,7 +114,19 @@ export default function Profile() {
       <h2 className="text-2xl font-bold mb-6">My Profile</h2>
 
       {/* PROFILE INFO */}
-      <div className="bg-white p-4 rounded shadow mb-6">
+      <div className="bg-white p-4 rounded shadow mb-6 text-center">
+        {preview ? (
+          <img
+            src={preview}
+            alt="Profile"
+            className="w-32 h-32 mx-auto rounded-full object-cover mb-4"
+          />
+        ) : (
+          <div className="w-32 h-32 mx-auto rounded-full bg-gray-200 flex items-center justify-center mb-4">
+            <span className="text-gray-500">No Image</span>
+          </div>
+        )}
+
         <p><b>Username:</b> {profile.username}</p>
         <p><b>Role:</b> {profile.role}</p>
       </div>
@@ -84,6 +136,20 @@ export default function Profile() {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded shadow space-y-4"
       >
+        {/* IMAGE UPLOAD */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Profile Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full"
+          />
+        </div>
+
+        {/* EMAIL */}
         <div>
           <label className="block text-sm font-medium mb-1">
             Email
@@ -97,6 +163,7 @@ export default function Profile() {
           />
         </div>
 
+        {/* FIRST NAME */}
         <div>
           <label className="block text-sm font-medium mb-1">
             First Name
@@ -106,10 +173,10 @@ export default function Profile() {
             value={form.first_name}
             onChange={handleChange}
             className="w-full border p-2 rounded"
-            placeholder="First Name"
           />
         </div>
 
+        {/* LAST NAME */}
         <div>
           <label className="block text-sm font-medium mb-1">
             Last Name
@@ -119,7 +186,6 @@ export default function Profile() {
             value={form.last_name}
             onChange={handleChange}
             className="w-full border p-2 rounded"
-            placeholder="Last Name"
           />
         </div>
 
