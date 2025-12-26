@@ -19,7 +19,7 @@ export default function EditCourse() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🚫 BLOCK NON-INSTRUCTORS
+
   useEffect(() => {
     if (user?.role !== "instructor") {
       navigate("/dashboard");
@@ -58,7 +58,7 @@ export default function EditCourse() {
       });
 
       alert("Course updated successfully");
-      navigate("/instructor/dashboard");
+      navigate("/dashboard");
     } catch {
       setError("Course update failed");
     }
